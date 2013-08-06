@@ -1,13 +1,13 @@
 {
 	"id": "ArView",
 	"name": "ArView",
-	"description" : "",
-	"author": "",
+	"description" : "augmented reality camera overlay",
+	"author": "Joe Beuckman",
 	"version": "1.0",
-	"copyright":"Copyright (c) 2012",
+	"copyright":"no",
 	"license":"Public Domain",
 	"min-alloy-version": "1.0",
 	"min-titanium-version":"2.1",
 	"tags":"",
-	"platforms":"android,ios,mobileweb,blackberry"
+	"platforms":"android,ios"
 }

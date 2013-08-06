@@ -22,6 +22,20 @@ The purpose of this "port" is to create an Alloy Widget and keep working on the 
 ```
 
    * `pois' is an array of objects representing places to be tagged in the view.
+   
+The poi description objects in the array take this form:
+```javascript
+	{
+   		address: place.vicinity,
+		image: place.icon,
+		latitude: place.geometry.location.lat,
+		longitude: place.geometry.location.lng,
+		link: place.icon,
+		rating: 5.0, 
+		title: place.name
+	}   
+```
+   
    * `overlay' is a view, possibly a title view, etc. that will sit on top of the ArView.
    
 ## Example App ##
