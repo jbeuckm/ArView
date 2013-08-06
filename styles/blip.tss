@@ -1,0 +1,6 @@
+View: {
+	height : '3dp',
+	width : '3dp',
+	backgroundColor : 'white',
+	borderRadius : 2
+}

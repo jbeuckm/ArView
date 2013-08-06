@@ -1,0 +1,13 @@
+<Alloy>
+	
+	<View id="poiView">
+
+		<ImageView id="poiImage"/>
+
+		<Label id="titleLabel"/>
+
+		<Label id="distanceLabel"/>
+
+	</View>
+		
+</Alloy>

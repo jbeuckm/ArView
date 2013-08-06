@@ -1,0 +1,36 @@
+
+'#poiView': {
+	height : '28dp',
+	width: Ti.UI.SIZE,
+	backgroundColor : 'white',
+	opacity : 0.6,
+	layout: 'horizontal'
+}
+
+'#poiImage': {
+	width : '24dp',
+	height : '24dp',
+	left: '2dp'
+}
+
+'#titleLabel': {
+	color : '#000',
+	width: Ti.UI.SIZE,
+	font : {
+		fontSize : '20dp',
+		fontWeight : 'bold'
+	},
+	top : '3dp',
+	right: '7dp',
+	left: '3dp'
+}
+
+'#distanceLabel': {
+	color: '#000',
+	width: Ti.UI.SIZE,
+	font: {
+		fontSize : '16dp'
+	},
+	top : '6dp',
+	right: '5dp'
+}
