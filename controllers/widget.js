@@ -20,12 +20,13 @@ overlay.width = screenWidth;
 $.arContainer.height = screenHeight;
 $.arContainer.width = screenWidth;
 
+/*
 var MAX_ZOOM = 1.0;
 var MIN_ZOOM = 0.35;
 var DELTA_ZOOM = MAX_ZOOM - MIN_ZOOM;
+*/
 
 var MIN_Y = Math.floor(screenHeight / 6);
-
 var MAX_Y = Math.floor(screenHeight / 4 * 3);
 var DELTA_Y = MAX_Y - MIN_Y;
 
@@ -87,19 +88,6 @@ function showAR() {
 		transform: cameraTransform
 	});
 }
-
-function closeAndDestroy() {
-	acc.destroy();
-	Ti.Geolocation.removeEventListener('heading', headingCallback);
-	Ti.Geolocation.removeEventListener('location', locationCallback);
-	if (!isAndroid) {
-		Ti.Media.hideCamera();
-	}
-	setTimeout(function() {
-		$.win.close();
-	}, 500);
-}
-
 
 
 
@@ -446,11 +434,23 @@ function attachArViewsToPois(pois) {
 }
 
 
-exports = {
-	findAngularDistance: findAngularDistance,
-	calculateDistance: calculateDistance,
-	calculateBearing: calculateBearing,
-	toRad: toRad,
-	closeAndDestroy: closeAndDestroy
-};
+function closeAndDestroy() {
+	acc.destroy();
+	Ti.Geolocation.removeEventListener('heading', headingCallback);
+	Ti.Geolocation.removeEventListener('location', locationCallback);
+	if (!isAndroid) {
+		Ti.Media.hideCamera();
+	}
+	setTimeout(function() {
+		$.win.close();
+	}, 500);
+}
+
+
+exports.findAngularDistance = findAngularDistance;
+exports.calculateDistance = calculateDistance;
+exports.calculateBearing = calculateBearing;
+exports.toRad = toRad;
+exports.closeAndDestroy = closeAndDestroy;
+
 
