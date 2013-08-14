@@ -32,15 +32,15 @@ View: {
 }
 
 '#headingLabel': {
-	bottom : '20dp',
-	height : '20dp',
+	bottom : 20,
+	width: 50,
+	height: 20,
 	text : "",
 	textAlign : 'center',
 	color : 'white',
 	backgroundColor : 'black',
-	opacity : 0.5,
 	font : {
-		fontSize : '12dp'
+		fontSize : 16
 	}
 }
 

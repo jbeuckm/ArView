@@ -1,5 +1,7 @@
 <Alloy>
 	
+	<Model src="Poi" instance="true" id="poiModel"/>
+	
 	<View id="poiView">
 
 		<ImageView id="poiImage"/>

@@ -2,14 +2,8 @@ var args = arguments[0] || {};
 
 var isAndroid = Ti.Platform.osname == 'android';
 
-if (isAndroid) {
-	// Landscape Mode
-	var screenWidth = Ti.Platform.displayCaps.platformHeight;
-	var screenHeight = Ti.Platform.displayCaps.platformWidth;
-} else {
-	var screenWidth = Ti.Platform.displayCaps.platformWidth;
-	var screenHeight = Ti.Platform.displayCaps.platformHeight;
-}
+var screenWidth = Ti.Platform.displayCaps.platformWidth;
+var screenHeight = Ti.Platform.displayCaps.platformHeight;
 
 var halfScreenHeight = screenHeight / 2;
 var halfScreenWidth = screenWidth / 2;
@@ -20,11 +14,6 @@ overlay.width = screenWidth;
 $.arContainer.height = screenHeight;
 $.arContainer.width = screenWidth;
 
-/*
-var MAX_ZOOM = 1.0;
-var MIN_ZOOM = 0.35;
-var DELTA_ZOOM = MAX_ZOOM - MIN_ZOOM;
-*/
 
 var MIN_Y = Math.floor(screenHeight / 6);
 var MAX_Y = Math.floor(screenHeight / 4 * 3);
@@ -51,14 +40,14 @@ var volatility = 1 - stability;
 var PI_2 = Math.PI/2;
 var viewAngle; // from 0 (looking straight up) to PI (looking straight down)
 
-function accelerate(e) {
+function accelerationHandler(e) {
 	viewAngle = Math.atan2(e.y, e.z);
 	yOffset = stability * yOffset + volatility * (halfScreenHeight * (viewAngle + PI_2));
 	
 	updatePoiViews();
 }
 var acc = require(WPATH('accelerometer'));
-acc.setupCallback(accelerate);
+acc.setupCallback(accelerationHandler);
 acc.start();
 
 
@@ -73,11 +62,9 @@ function showAR() {
 		},
 		cancel : function() {
 			Ti.API.error('android user cancelled open ar view');
-//			clickClose();
 		},
 		error : function(error) {
 			Ti.API.error('unable to open camera view');
-//			closeAR();
 		},
 		mediaTypes : [Ti.Media.MEDIA_TYPE_VIDEO, Ti.Media.MEDIA_TYPE_PHOTO],
 		showControls : false,
@@ -106,7 +93,7 @@ if (args.overlay) {
 
 
 // iPhone camera sees about 30 degrees left to right
-var FIELD_OF_VIEW = 30;
+var FIELD_OF_VIEW_HORIZONTAL = 30;
 
 var maxRange = 1000;
 
@@ -123,7 +110,7 @@ $.win.addEventListener('open', function() {
 if (args.hideCloseButton) {
 	$.closeButton.visible = false;
 }
-//$.closeButton.addEventListener('click', closeAR);
+
 
 if (args.initialLocation) {
 	deviceLocation = args.initialLocation;
@@ -135,7 +122,7 @@ function assignPOIs(_pois) {
 
 	attachArViewsToPois(pois);
 
-	addViews();
+	addPoiViews();
 	createRadarBlips();	
 
 	if (deviceLocation && deviceBearing) {
@@ -144,6 +131,10 @@ function assignPOIs(_pois) {
 }
 
 if (args.pois) {
+	
+//	Widget.Collections.Poi.reset(args.pois);
+//Ti.API.debug(Widget.Collections.Poi);
+	
 	assignPOIs(args.pois);
 }
 
@@ -206,7 +197,7 @@ var poiScaleRange = maxPoiScale - minPoiScale;
  */
 function updateRelativePositions() {
 	
-	minPoiDistance = 1000000;
+	minPoiDistance = Number.MAX_VALUE;
 	maxPoiDistance = 0;
 
 	for (i=0, l=pois.length; i<l; i++) {
@@ -306,7 +297,7 @@ function updatePoiViews() {
 }
 
 
-function addViews() {
+function addPoiViews() {
 	for (i=0, l=pois.length; i<l; i++) {
 		var poi = pois[i];
 		if (poi.view) {
@@ -342,7 +333,7 @@ function createRadarBlips() {
 
 function positionRadarBlip(poi) {
 
-	var rad = toRad(poi.bearing);
+	var rad = degrees2Radians(poi.bearing);
 
 	var relativeDistance = poi.distance / (maxRange * 1.2);
 	var x = (40 + (relativeDistance * 40 * Math.sin(rad)));
@@ -360,11 +351,8 @@ function positionRadarBlip(poi) {
  * @param {Object} poiBearing
  */
 function projectBearingIntoScene(poiBearing) {
-
 	var delta = findAngularDistance(poiBearing, deviceBearing);
-//Ti.API.info('delta = '+delta);	
-	return delta * screenWidth / FIELD_OF_VIEW;
-
+	return delta * screenWidth / FIELD_OF_VIEW_HORIZONTAL;
 }
 
 
@@ -378,7 +366,7 @@ function findAngularDistance(theta1, theta2) {
 	return a;
 }
 
-function toRad(val) {
+function degrees2Radians(val) {
 	return val * Math.PI / 180;
 };
 
@@ -388,9 +376,9 @@ function toRad(val) {
  * @param {Object} point2
  */
 function calculateBearing(point1, point2) {
-	var lat1 = toRad(point1.latitude);
-	var lat2 = toRad(point2.latitude);
-	var dlng = toRad((point2.longitude - point1.longitude));
+	var lat1 = degrees2Radians(point1.latitude);
+	var lat2 = degrees2Radians(point2.latitude);
+	var dlng = degrees2Radians((point2.longitude - point1.longitude));
 	var y = Math.sin(dlng) * Math.cos(lat2);
 	var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dlng);
 	var brng = Math.atan2(y, x);
@@ -404,10 +392,10 @@ function calculateBearing(point1, point2) {
  */
 function calculateDistance(loc1, loc2) {
 	var R = 6371;	// Radius of the earth in km
-	var dLat = (toRad(loc2.latitude - loc1.latitude));
+	var dLat = (degrees2Radians(loc2.latitude - loc1.latitude));
 	// Javascript functions in radians
-	var dLon = (toRad(loc2.longitude - loc1.longitude));
-	var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(loc1.latitude)) * Math.cos(toRad(loc2.latitude)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+	var dLon = (degrees2Radians(loc2.longitude - loc1.longitude));
+	var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(degrees2Radians(loc1.latitude)) * Math.cos(degrees2Radians(loc2.latitude)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
 	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	// Distance in m
 	return R * c * 1000;
@@ -450,7 +438,7 @@ function closeAndDestroy() {
 exports.findAngularDistance = findAngularDistance;
 exports.calculateDistance = calculateDistance;
 exports.calculateBearing = calculateBearing;
-exports.toRad = toRad;
+exports.degrees2Radians = degrees2Radians;
 exports.closeAndDestroy = closeAndDestroy;
 
 

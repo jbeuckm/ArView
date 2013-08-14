@@ -1,4 +1,7 @@
 <Alloy>
+
+	<Collection src="Poi"/>
+
 	<Window id="win">
 		
 		<!-- this gets used as the overlay of the camera / not displayed directly -->
@@ -10,8 +13,10 @@
 
 			<View id="radarView"></View>
 			
-			<Label id="headingLabel"></Label>
-				
+			<View id="debugOverlay">
+				<Label id="headingLabel"></Label>
+			</View>
+
 		</View>
 
 	</Window>
