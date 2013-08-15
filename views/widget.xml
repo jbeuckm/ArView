@@ -7,16 +7,29 @@
 		<!-- this gets used as the overlay of the camera / not displayed directly -->
 		<View id="overlay">
 			
-			<View id="arContainer"/>
+			<!-- used to rotate the view in accordance with device orientation -->
+			<View id="trunnion">
+
+				<View id="arContainer"/>
+				
+				<View id="debugOverlay">
+					<View class="fieldHolder">
+						<Label class="debugLabel">heading: </Label> <Label class="debugLabel" id="headingLabel"/>
+					</View>
+					<View class="fieldHolder">
+						<Label class="debugLabel">pitch: </Label> <Label class="debugLabel" id="pitchLabel"/>
+					</View>
+					<View class="fieldHolder">
+						<Label class="debugLabel">roll: </Label> <Label class="debugLabel" id="rollLabel"/>
+					</View>
+				</View>
+			
+			</View>
 			
 			<Button id="closeButton" onClick="closeAndDestroy" />
 
 			<View id="radarView"></View>
-			
-			<View id="debugOverlay">
-				<Label id="headingLabel"></Label>
-			</View>
-
+				
 		</View>
 
 	</Window>

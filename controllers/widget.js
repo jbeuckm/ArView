@@ -11,8 +11,9 @@ var halfScreenWidth = screenWidth / 2;
 var overlay = $.overlay;
 overlay.height = screenHeight;
 overlay.width = screenWidth;
-$.arContainer.height = screenHeight;
-$.arContainer.width = screenWidth;
+// view large enough to rotate 90deg without seeing edges
+$.arContainer.height = 1.2 * screenHeight;
+$.arContainer.width = 1.2 * screenHeight;
 
 
 var MIN_Y = Math.floor(screenHeight / 6);
@@ -38,11 +39,19 @@ var yOffset = 0;
 var stability = .6;
 var volatility = 1 - stability;
 var PI_2 = Math.PI/2;
-var viewAngle; // from 0 (looking straight up) to PI (looking straight down)
+
+var pitch; // from 90 (looking straight up) to -90 (looking straight down)
+var roll;
 
 function accelerationHandler(e) {
-	viewAngle = Math.atan2(e.y, e.z);
-	yOffset = stability * yOffset + volatility * (halfScreenHeight * (viewAngle + PI_2));
+
+	pitch = e.z * 90;
+	roll = radians2Degrees(Math.atan2(e.y, e.x));
+
+$.pitchLabel.text = pitch.toPrecision(3);
+$.rollLabel.text = roll.toPrecision(3);
+	
+	yOffset = stability * yOffset + volatility * (halfScreenHeight * (pitch + PI_2));
 	
 	updatePoiViews();
 }
@@ -185,6 +194,8 @@ function headingCallback(e) {
 	radar.transform = Ti.UI.create2DMatrix().rotate(-1 * deviceBearing);
 	
 	updatePoiViews();
+	
+	Alloy.Globals.deviceBearing = deviceBearing;
 }
 
 var minPoiDistance, maxPoiDistance;
@@ -253,7 +264,14 @@ var lowY = screenHeight/2 * .8;
 var highY = -screenHeight/2 * .8;
 var yRange = highY - lowY;
 
+// container for pivoting the scene according to device orientation
+var trunnion = $.trunnion;
+
 function updatePoiViews() {
+	
+	var trunnionTransform = Ti.UI.create2DMatrix();
+//	trunnionTransform
+	trunnion.transform = trunnionTransform.rotate(-roll - 90);
 
 	for (i=0, l=pois.length; i<l; i++) {
 
@@ -366,9 +384,13 @@ function findAngularDistance(theta1, theta2) {
 	return a;
 }
 
+var d2rFactor = Math.PI / 180;
 function degrees2Radians(val) {
-	return val * Math.PI / 180;
+	return val * d2rFactor;
 };
+function radians2Degrees(val) {
+	return val / d2rFactor;
+}
 
 /**
  * Which direction to get from point1 to point2?
