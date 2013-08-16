@@ -16,6 +16,7 @@ $.arContainer.height = 1.2 * screenHeight;
 $.arContainer.width = 1.2 * screenHeight;
 
 
+var MAX_POI_COUNT = 25;
 var MIN_Y = Math.floor(screenHeight / 6);
 var MAX_Y = Math.floor(screenHeight / 4 * 3);
 var DELTA_Y = MAX_Y - MIN_Y;
@@ -121,9 +122,8 @@ if (args.hideCloseButton) {
 }
 
 
-if (args.initialLocation) {
-	deviceLocation = args.initialLocation;
-}
+deviceLocation = args.initialLocation;
+
 
 function assignPOIs(_pois) {
 
@@ -140,15 +140,12 @@ function assignPOIs(_pois) {
 }
 
 if (args.pois) {
-	
-//	Widget.Collections.Poi.reset(args.pois);
-//Ti.API.debug(Widget.Collections.Poi);
-	
 	assignPOIs(args.pois);
 }
 
+
 function poiClick(e) {
-	Ti.API.info(e);
+	alert(e);
 }
 
 
@@ -315,6 +312,30 @@ function updatePoiViews() {
 
 
 function addPoiViews() {
+	
+	for (i=0, l=pois.length; i<l; i++) {
+		var poi = pois[i];
+		poi.distance = calculateDistance(deviceLocation, poi);
+	}
+
+	if (pois.length > MAX_POI_COUNT) {
+		pois.sort(function(a, b){
+			if (a.distance < b.distance) {
+				return -1
+			}
+			else if (b.distance < a.distance) {
+				return 1
+			}
+			else {
+				return 0;
+			}
+		});
+		Ti.API.debug('sorted pois by distance:');
+		Ti.API.debug(pois.map(function(d){ return d.distance; }));
+		
+		pois = pois.slice(0, MAX_POI_COUNT);
+	}
+	
 	for (i=0, l=pois.length; i<l; i++) {
 		var poi = pois[i];
 		if (poi.view) {
@@ -328,7 +349,6 @@ function addPoiViews() {
 		}
 	}
 }
-
 
 
 function createRadarBlips() {
