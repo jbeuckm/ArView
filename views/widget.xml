@@ -4,11 +4,9 @@
 
 	<Window id="win">
 		
-		<!-- this gets used as the overlay of the camera / not displayed directly -->
 		<View id="overlay">
 			
-			<!-- used to rotate the view in accordance with device orientation -->
-			<View id="trunnion">
+			<View id="gimbal">
 
 				<View id="arContainer"/>
 				

@@ -265,13 +265,12 @@ var highY = -screenHeight/2 * .8;
 var yRange = highY - lowY;
 
 // container for pivoting the scene according to device orientation
-var trunnion = $.trunnion;
+var gimbal = $.gimbal;
 
 function updatePoiViews() {
 	
-	var trunnionTransform = Ti.UI.create2DMatrix();
-//	trunnionTransform
-	trunnion.transform = trunnionTransform.rotate(-roll - 90);
+	var gimbalTransform = Ti.UI.create2DMatrix();
+	gimbal.transform = gimbalTransform.rotate(-roll - 90);
 
 	for (i=0, l=pois.length; i<l; i++) {
 
