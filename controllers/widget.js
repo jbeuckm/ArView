@@ -152,24 +152,17 @@ function poiClick(e) {
 
 
 function cullDistantPois(_pois, MAX_COUNT) {
-Ti.API.info("cullDistantPois()");
+
 	for (i=0, l=_pois.length; i<l; i++) {
 		var poi = _pois[i];
-Ti.API.debug(deviceLocation.latitude+", "+deviceLocation.longitude);
-Ti.API.debug(poi.latitude+", "+poi.longitude);
 		var d = calculateDistance(deviceLocation, poi);
-Ti.API.debug("calculated distance = "+d);
 		poi.distance = d;
-Ti.API.debug(poi);
-break;
 	}
 
 	if (_pois.length > MAX_COUNT) {
 		_pois.sort(function(a, b){
 			return a.distance - b.distance;
 		});
-		Ti.API.debug('sorted pois by distance:');
-//		Ti.API.debug(_pois.map(function(d){ return d.distance; }));
 		
 		_pois = _pois.slice(0, MAX_POI_COUNT);
 	}
@@ -363,12 +356,10 @@ function createRadarBlips() {
 
 		var poi = pois[i];
 
-		// add to blip to the radar
 		// The Radar Blips ....
 		poi.blip = require('/alloy').createWidget('ArView', 'blip', {}).getView();
-
 		positionRadarBlip(poi);		
-		
+		// add to blip to the radar
 		radar.add(poi.blip);
 	}
 }
