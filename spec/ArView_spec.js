@@ -28,6 +28,36 @@ describe("ArView Tests", function() {
 			expect(d).not.toBeLessThan(0);
 		});
 
+		it("can recognize colocation", function(){
+			var loc1 = {
+				latitude: 44,
+				longitude: -93
+			};
+			var loc2 = {
+				latitude: 44,
+				longitude: -93
+			};
+			
+			var d = widget.calculateDistance(loc1, loc2);
+			expect(d).toBe(0);
+		});
+
+		it("can reject non-numeric values", function(){
+			var loc1 = {
+				latitude: 44,
+				longitude: -93
+			};
+			var loc2 = {
+				latitude: 44,
+				longitude: "i am not a number"
+			};
+			
+			function testNonNumber() {
+				widget.calculateDistance(loc1, loc2);
+			}
+			expect(testNonNumber).toThrow();
+		});
+
 	});
 	
 }); 

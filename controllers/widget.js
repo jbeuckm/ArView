@@ -1,5 +1,6 @@
 var args = arguments[0] || {};
 
+
 var isAndroid = Ti.Platform.osname == 'android';
 
 var screenWidth = Ti.Platform.displayCaps.platformWidth;
@@ -15,6 +16,7 @@ overlay.width = screenWidth;
 $.arContainer.height = 1.2 * screenHeight;
 $.arContainer.width = 1.2 * screenHeight;
 
+var d2rFactor = Math.PI / 180;
 
 var MAX_POI_COUNT = 25;
 var MIN_Y = Math.floor(screenHeight / 6);
@@ -127,8 +129,8 @@ deviceLocation = args.initialLocation;
 
 function assignPOIs(_pois) {
 
-	pois = _pois;
-
+	pois = cullDistantPois(_pois, MAX_POI_COUNT);
+	
 	attachArViewsToPois(pois);
 
 	addPoiViews();
@@ -146,6 +148,33 @@ if (args.pois) {
 
 function poiClick(e) {
 	alert(e);
+}
+
+
+function cullDistantPois(_pois, MAX_COUNT) {
+Ti.API.info("cullDistantPois()");
+	for (i=0, l=_pois.length; i<l; i++) {
+		var poi = _pois[i];
+Ti.API.debug(deviceLocation.latitude+", "+deviceLocation.longitude);
+Ti.API.debug(poi.latitude+", "+poi.longitude);
+		var d = calculateDistance(deviceLocation, poi);
+Ti.API.debug("calculated distance = "+d);
+		poi.distance = d;
+Ti.API.debug(poi);
+break;
+	}
+
+	if (_pois.length > MAX_COUNT) {
+		_pois.sort(function(a, b){
+			return a.distance - b.distance;
+		});
+		Ti.API.debug('sorted pois by distance:');
+//		Ti.API.debug(_pois.map(function(d){ return d.distance; }));
+		
+		_pois = _pois.slice(0, MAX_POI_COUNT);
+	}
+
+	return _pois;
 }
 
 
@@ -315,29 +344,6 @@ function addPoiViews() {
 	
 	for (i=0, l=pois.length; i<l; i++) {
 		var poi = pois[i];
-		poi.distance = calculateDistance(deviceLocation, poi);
-	}
-
-	if (pois.length > MAX_POI_COUNT) {
-		pois.sort(function(a, b){
-			if (a.distance < b.distance) {
-				return -1
-			}
-			else if (b.distance < a.distance) {
-				return 1
-			}
-			else {
-				return 0;
-			}
-		});
-		Ti.API.debug('sorted pois by distance:');
-		Ti.API.debug(pois.map(function(d){ return d.distance; }));
-		
-		pois = pois.slice(0, MAX_POI_COUNT);
-	}
-	
-	for (i=0, l=pois.length; i<l; i++) {
-		var poi = pois[i];
 		if (poi.view) {
 
 			poi.view.addEventListener('click', poiClick);
@@ -403,10 +409,9 @@ function findAngularDistance(theta1, theta2) {
 	return a;
 }
 
-var d2rFactor = Math.PI / 180;
 function degrees2Radians(val) {
 	return val * d2rFactor;
-};
+}
 function radians2Degrees(val) {
 	return val / d2rFactor;
 }
@@ -432,10 +437,24 @@ function calculateBearing(point1, point2) {
  * @param {Object} loc2
  */
 function calculateDistance(loc1, loc2) {
+	
+	if (!loc1.latitude || (typeof loc1.latitude != "number")) {
+		throw(new Error("error reading loc1.latitude"));
+	}
+	if (!loc1.longitude || (typeof loc1.longitude != "number")) {
+		throw(new Error("error reading loc1.longitude"));
+	}
+	if (!loc2.latitude || (typeof loc2.latitude != "number")) {
+		throw(new Error("error reading loc2.latitude"));
+	}
+	if (!loc2.longitude || (typeof loc2.longitude != "number")) {
+		throw(new Error("error reading loc2.longitude"));
+	}
+
+	var dLat = degrees2Radians(loc2.latitude - loc1.latitude);
+	var dLon = degrees2Radians(loc2.longitude - loc1.longitude);
+
 	var R = 6371;	// Radius of the earth in km
-	var dLat = (degrees2Radians(loc2.latitude - loc1.latitude));
-	// Javascript functions in radians
-	var dLon = (degrees2Radians(loc2.longitude - loc1.longitude));
 	var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(degrees2Radians(loc1.latitude)) * Math.cos(degrees2Radians(loc2.latitude)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
 	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	// Distance in m
@@ -482,4 +501,4 @@ exports.calculateBearing = calculateBearing;
 exports.degrees2Radians = degrees2Radians;
 exports.closeAndDestroy = closeAndDestroy;
 
-
+exports.cullDistantPois = cullDistantPois;

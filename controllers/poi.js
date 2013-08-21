@@ -6,7 +6,7 @@ $.titleLabel.text = args.title;
 
 exports.setDistance = function(d) {
 	$.distanceLabel.text = d;
-}
+};
 
 if (args.image) {
 	$.poiImage.image = args.image;
