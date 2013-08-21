@@ -16,11 +16,7 @@ var halfScreenWidth = screenWidth / 2;
 
 
 var MAX_POI_COUNT = 25;
-/*
-var MIN_Y = Math.floor(screenHeight / 6);
-var MAX_Y = Math.floor(screenHeight / 4 * 3);
-var DELTA_Y = MAX_Y - MIN_Y;
-*/
+
 var limitLeft = -halfScreenHeight - 100;
 var limitRight = halfScreenHeight + 100;
 
@@ -29,9 +25,10 @@ var highY = -halfScreenWidth * .8;
 var yRange = highY - lowY;
 
 
+$.debugOverlay.visible = false;
 
-$.overlay.height = screenHeight;
-$.overlay.width = screenWidth;
+$.overlay.height = 1.2 * screenHeight;
+$.overlay.width = 1.2 * screenHeight;
 // view large enough to rotate 90deg without seeing edges
 $.arContainer.height = 1.2 * screenHeight;
 $.arContainer.width = 1.2 * screenHeight;
@@ -64,10 +61,10 @@ function accelerationHandler(e) {
 	devicePitch = e.z * 90;
 	deviceRoll = location_utils.radians2Degrees(Math.atan2(e.y, e.x));
 
-$.pitchLabel.text = devicePitch.toPrecision(3);
-$.rollLabel.text = deviceRoll.toPrecision(3);
+	$.pitchLabel.text = devicePitch.toPrecision(3);
+	$.rollLabel.text = deviceRoll.toPrecision(3);
 	
-	yOffset = stability * yOffset + volatility * (halfScreenHeight * (devicePitch + PI_2));
+	yOffset = stability * yOffset + volatility * 2*devicePitch;
 	
 	updatePoiViews();
 }
@@ -189,7 +186,6 @@ function locationCallback(e) {
 		};
 	}
 
-Ti.API.info('locationCallback('+e.coords.latitude+', '+e.coords.longitude+')');
 	deviceLocation = e.coords;
 	
 	if (!deviceLocation) {
@@ -271,10 +267,12 @@ function updateRelativePositions() {
 				poi.inRange = false;
 			}
 		}
+		/*
 		else {
 			// don't show pois that don't have views
 			poi.inRange = false;
 		}
+		*/
 	}
 	
 	poiDistanceRange = maxPoiDistance - minPoiDistance;
@@ -316,7 +314,7 @@ function updatePoiViews() {
 
 				var y = lowY + distanceRank * yRange + yOffset;
 				// this translation is from the center of the screen
-//Ti.API.info(horizontalPositionInScene);
+Ti.API.info("positioning poi "+poi.latitude+", "+poi.longitude+" ("+poi.distance+") to "+horizontalPositionInScene+", "+y);
 //				transform = transform.translate(horizontalPositionInScene, 0);
 				transform = transform.translate(horizontalPositionInScene, y);
 
