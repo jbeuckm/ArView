@@ -1,5 +1,8 @@
 var args = arguments[0] || {};
 
+
+$.debugOverlay.visible = false;
+
 var acc = require(WPATH('accelerometer'));
 var location_utils = require(WPATH("location_utils"));
 
@@ -25,7 +28,6 @@ var highY = -halfScreenWidth * .8;
 var yRange = highY - lowY;
 
 
-$.debugOverlay.visible = false;
 
 $.overlay.height = 1.2 * screenHeight;
 $.overlay.width = 1.2 * screenHeight;
@@ -54,19 +56,21 @@ var volatility = 1 - stability;
 var PI_2 = Math.PI/2;
 
 var devicePitch = 0; // from 90 (looking straight up) to -90 (looking straight down)
+var pitchStability = .7;
+var pitchVolatility = 1 - pitchStability;
+
 var deviceRoll = 0;
 
 function accelerationHandler(e) {
 
-	devicePitch = e.z * 90;
+	devicePitch = (pitchStability * devicePitch) + (pitchVolatility * (e.z * 90));
+
 	deviceRoll = location_utils.radians2Degrees(Math.atan2(e.y, e.x));
 
 	$.pitchLabel.text = devicePitch.toPrecision(3);
 	$.rollLabel.text = deviceRoll.toPrecision(3);
 	
 	yOffset = stability * yOffset + volatility * 2*devicePitch;
-	
-	updatePoiViews();
 }
 acc.setupCallback(accelerationHandler);
 acc.start();
@@ -200,11 +204,13 @@ function locationCallback(e) {
 			var poi = pois[i];
 			positionRadarBlip(poi);
 		}
-
-		updatePoiViews();
 	}
 };
 
+
+var filteredDeviceBearing = 0;
+var bearingStability = .7;
+var bearingVolatility = 1 - bearingStability;
 
 /**
  * Compass has indicated a new heading
@@ -212,18 +218,12 @@ function locationCallback(e) {
  * @param {Object} e
  */
 function headingCallback(e) {
-
 	deviceBearing = e.heading.trueHeading;
+	filteredDeviceBearing = (bearingStability * filteredDeviceBearing) + (bearingVolatility * deviceBearing);
 
-	// REM this if you don't want the user to see their heading
 	$.headingLabel.text = Math.floor(deviceBearing) + "\xB0";
 
-	// point the radar view
 	$.radarView.transform = Ti.UI.create2DMatrix().rotate(-1 * deviceBearing);
-	
-	updatePoiViews();
-	
-	Alloy.Globals.deviceBearing = deviceBearing;
 }
 
 var minPoiDistance, maxPoiDistance;
@@ -288,11 +288,33 @@ function updateRelativePositions() {
 
 }
 
+var lastRoll = 0;
+var rollStability = .7;
+var rollVolatility = 1 - rollStability;
 
 function updatePoiViews() {
 	
+	// take care of the wrapping problem
+	if (lastRoll - roll > 180) {
+		lastRoll -= 360;
+	}
+	else if (roll - lastRoll > 180) {
+		lastRoll += 360;
+	}
+	
 	var gimbalTransform = Ti.UI.create2DMatrix();
-	$.gimbal.transform = gimbalTransform.rotate(-deviceRoll - 90);
+	
+	
+	var roll;
+	if (Math.abs(deviceRoll - lastRoll) > 180) {
+		roll = deviceRoll;
+	}
+	else {
+		roll = (rollStability * lastRoll) + (rollVolatility * deviceRoll);
+	} 
+
+	$.gimbal.transform = gimbalTransform.rotate(-roll - 90);
+	lastRoll = roll;
 
 	for (i=0, l=pois.length; i<l; i++) {
 
@@ -314,8 +336,7 @@ function updatePoiViews() {
 
 				var y = lowY + distanceRank * yRange + yOffset;
 				// this translation is from the center of the screen
-Ti.API.info("positioning poi "+poi.latitude+", "+poi.longitude+" ("+poi.distance+") to "+horizontalPositionInScene+", "+y);
-//				transform = transform.translate(horizontalPositionInScene, 0);
+//Ti.API.info("positioning poi "+poi.latitude+", "+poi.longitude+" ("+poi.distance+") to "+horizontalPositionInScene+", "+y);
 				transform = transform.translate(horizontalPositionInScene, y);
 
 
@@ -416,7 +437,10 @@ function attachArViewsToPois(pois) {
 }
 
 
+var updateDisplayInterval = setInterval(updatePoiViews, 50);
+
 function closeAndDestroy() {
+	clearInterval(updateDisplayInterval);
 	acc.destroy();
 	Ti.Geolocation.removeEventListener('heading', headingCallback);
 	Ti.Geolocation.removeEventListener('location', locationCallback);
