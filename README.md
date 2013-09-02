@@ -33,8 +33,8 @@ The poi description objects in the array take this form:
 	{
 		title: "My Place's Name",
 		image: "place_icon.png",
-		latitude: place.geometry.location.lat,
-		longitude: place.geometry.location.lng
+		latitude: 44.1,
+		longitude: -93.1
 	}   
 ```
    
