@@ -203,7 +203,7 @@ function locationCallback(e) {
 
 
 
-var trueHeading;
+var trueHeading = 0;
 
 /**
  * Compass has indicated a new heading
@@ -273,7 +273,7 @@ function updateRelativePositions() {
 	}
 }
 
-//var lastRoll = 0;
+
 var filteredPitch = 0;
 var pitchStability = .7;
 var pitchVolatility = 1 - pitchStability;
@@ -287,8 +287,7 @@ var headingStability = .7;
 var headingVolatility = 1 - headingStability;
 
 function updatePoiViews() {
-    
-    // a little strange - filtering Y instead of devicePitch (like other sensors)
+
     filteredPitch = (pitchStability * filteredPitch) + (pitchVolatility * devicePitch);
     yOffset = 2 * filteredPitch;
 
@@ -302,10 +301,10 @@ function updatePoiViews() {
 	} 
 
     filteredTrueHeading = (headingStability * filteredTrueHeading) + (headingVolatility * trueHeading);
-    deviceBearing = trueHeading - 90 - filteredRoll;
+    deviceBearing = filteredTrueHeading - 90 - filteredRoll;
 
 	$.gimbal.transform = gimbalTransform.rotate(-filteredRoll - 90);
-//	lastRoll = filteredRoll;
+
 
 	for (i=0, l=pois.length; i<l; i++) {
 
