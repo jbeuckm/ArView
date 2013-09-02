@@ -54,9 +54,6 @@ var yOffset = 0;
 var PI_2 = Math.PI/2;
 
 var devicePitch = 0; 
-var filteredPitch = 0;
-var pitchStability = .7;
-var pitchVolatility = 1 - pitchStability;
 
 var deviceRoll = 0;
 
@@ -205,9 +202,6 @@ function locationCallback(e) {
 };
 
 
-var filteredTrueHeading = 0;
-var headingStability = .7;
-var headingVolatility = 1 - headingStability;
 
 var trueHeading;
 
@@ -279,11 +273,18 @@ function updateRelativePositions() {
 	}
 }
 
-var lastRoll = 0;
-var filteredRoll;
+//var lastRoll = 0;
+var filteredPitch = 0;
+var pitchStability = .7;
+var pitchVolatility = 1 - pitchStability;
 
+var filteredRoll = 0;
 var rollStability = .7;
 var rollVolatility = 1 - rollStability;
+
+var filteredTrueHeading = 0;
+var headingStability = .7;
+var headingVolatility = 1 - headingStability;
 
 function updatePoiViews() {
     
@@ -293,18 +294,18 @@ function updatePoiViews() {
 
 	var gimbalTransform = Ti.UI.create2DMatrix();
 	
-	if (Math.abs(deviceRoll - lastRoll) > 180) {
+	if (Math.abs(deviceRoll - filteredRoll) > 180) {
 		filteredRoll = deviceRoll;
 	}
 	else {
-		filteredRoll = (rollStability * lastRoll) + (rollVolatility * deviceRoll);
+		filteredRoll = (rollStability * filteredRoll) + (rollVolatility * deviceRoll);
 	} 
 
     filteredTrueHeading = (headingStability * filteredTrueHeading) + (headingVolatility * trueHeading);
     deviceBearing = trueHeading - 90 - filteredRoll;
 
 	$.gimbal.transform = gimbalTransform.rotate(-filteredRoll - 90);
-	lastRoll = filteredRoll;
+//	lastRoll = filteredRoll;
 
 	for (i=0, l=pois.length; i<l; i++) {
 
