@@ -1,11 +1,12 @@
 var args = arguments[0] || {};
 
-
-$.debugOverlay.visible = false;
+if (!args.showDebugView) {
+    $.debugOverlay.visible = false;
+}
 
 var acc = require(WPATH('accelerometer'));
 var location_utils = require(WPATH("location_utils"));
-
+exports.location_utils = location_utils;
 
 var deviceLocation = null;
 var deviceBearing = 1;
@@ -117,10 +118,15 @@ if (args.maxDistance) {
 	maxRange = args.maxDistance;
 }
 
-$.win.addEventListener('open', function() {
+
+$.win.addEventListener('open', windowOpenHandler);
+function windowOpenHandler() {
+    $.win.removeEventListener('open', windowOpenHandler);
 	Ti.API.debug('AR Window Open...');
 	setTimeout(showAR, 500);
-});
+}
+
+
 
 
 if (args.hideCloseButton) {
@@ -180,6 +186,10 @@ function cullDistantPois(_pois, MAX_COUNT) {
  * @param {Object} e
  */
 function locationCallback(e) {
+    
+    if (args.staticLocation) {
+        return;
+    }
 
 	//default to minneapolis in the simulator
 	if (Ti.Platform.model == "Simulator") {
@@ -218,10 +228,10 @@ var bearingVolatility = 1 - bearingStability;
  * @param {Object} e
  */
 function headingCallback(e) {
-	deviceBearing = e.heading.trueHeading;
+	deviceBearing = e.heading.trueHeading - deviceRoll;
 	filteredDeviceBearing = (bearingStability * filteredDeviceBearing) + (bearingVolatility * deviceBearing);
 
-	$.headingLabel.text = Math.floor(deviceBearing) + "\xB0";
+	$.headingLabel.text = deviceBearing.toPrecision(3) + "" + '\xB0';
 
 	$.radarView.transform = Ti.UI.create2DMatrix().rotate(-1 * deviceBearing);
 }
