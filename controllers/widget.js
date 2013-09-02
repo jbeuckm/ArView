@@ -296,19 +296,12 @@ function updatePoiViews() {
     yOffset = 2 * filteredPitch;
 
 	var gimbalTransform = Ti.UI.create2DMatrix();
-/*	
-	if (Math.abs(deviceRoll - filteredRoll) > 180) {
-		filteredRoll = deviceRoll;
-	}
-	else {
-		filteredRoll = (rollStability * filteredRoll) + (rollVolatility * deviceRoll);
-	} 
-*/
+
+
     filteredRoll += rollVolatility * location_utils.findAngularDistance(deviceRoll, filteredRoll);
     if (filteredRoll > 180) filteredRoll -= 360;
     else if (filteredRoll < -180) filteredRoll += 360;
 
-//    filteredTrueHeading = (headingStability * filteredTrueHeading) + (headingVolatility * trueHeading);
     filteredTrueHeading += headingVolatility * location_utils.findAngularDistance(trueHeading, filteredTrueHeading);
     if (filteredTrueHeading > 180) filteredTrueHeading -= 360;
     else if (filteredTrueHeading < -180) filteredTrueHeading += 360;
