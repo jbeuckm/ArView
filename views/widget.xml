@@ -23,11 +23,11 @@
 				</View>
 			
 			</View>
-			
+<!-->			
 			<Button id="closeButton" onClick="closeAndDestroy" />
 
 			<View id="radarView"></View>
-				
+	-->			
 		</View>
 
 	</Window>

@@ -1,5 +1,9 @@
 var args = arguments[0] || {};
 
+if (!$.radarView) {
+    $.radarView = Ti.UI.createView();
+}
+
 if (!args.showDebugView) {
     $.debugOverlay.visible = false;
 }
@@ -87,7 +91,7 @@ function showAR() {
 		error : function(error) {
 			Ti.API.error('unable to open camera view');
 		},
-		mediaTypes : [Ti.Media.MEDIA_TYPE_VIDEO, Ti.Media.MEDIA_TYPE_PHOTO],
+		mediaTypes : [Ti.Media.MEDIA_TYPE_VIDEO],
 		showControls : false,
 		autohide : false,
 		autofocus : "off",
@@ -292,16 +296,26 @@ function updatePoiViews() {
     yOffset = 2 * filteredPitch;
 
 	var gimbalTransform = Ti.UI.create2DMatrix();
-	
+/*	
 	if (Math.abs(deviceRoll - filteredRoll) > 180) {
 		filteredRoll = deviceRoll;
 	}
 	else {
 		filteredRoll = (rollStability * filteredRoll) + (rollVolatility * deviceRoll);
 	} 
+*/
+    filteredRoll += rollVolatility * location_utils.findAngularDistance(deviceRoll, filteredRoll);
+    if (filteredRoll > 180) filteredRoll -= 360;
+    else if (filteredRoll < -180) filteredRoll += 360;
 
-    filteredTrueHeading = (headingStability * filteredTrueHeading) + (headingVolatility * trueHeading);
+//    filteredTrueHeading = (headingStability * filteredTrueHeading) + (headingVolatility * trueHeading);
+    filteredTrueHeading += headingVolatility * location_utils.findAngularDistance(trueHeading, filteredTrueHeading);
+    if (filteredTrueHeading > 180) filteredTrueHeading -= 360;
+    else if (filteredTrueHeading < -180) filteredTrueHeading += 360;
+    
     deviceBearing = filteredTrueHeading - 90 - filteredRoll;
+    if (deviceBearing > 180) deviceBearing -= 360;
+    else if (deviceBearing < -180) deviceBearing += 360;
 
 	$.gimbal.transform = gimbalTransform.rotate(-filteredRoll - 90);
 
