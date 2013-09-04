@@ -3,6 +3,10 @@ var args = arguments[0] || {};
 if (!$.radarView) {
     $.radarView = Ti.UI.createView();
 }
+if (!$.closeButton) {
+    $.closeButton = Ti.UI.createView();
+}
+
 
 if (!args.showDebugView) {
     $.debugOverlay.visible = false;
@@ -23,14 +27,15 @@ var halfScreenHeight = screenHeight / 2;
 var halfScreenWidth = screenWidth / 2;
 
 
-var MAX_POI_COUNT = 25;
+var MAX_POI_COUNT = 10;
 
 var limitLeft = -halfScreenHeight - 100;
 var limitRight = halfScreenHeight + 100;
 
-var lowY = halfScreenWidth * .8;
-var highY = -halfScreenWidth * .8;
+var lowY = halfScreenWidth * .9;
+var highY = -halfScreenWidth * .9;
 var yRange = highY - lowY;
+var rankHeight = 10;
 
 // view large enough to rotate ~45deg without seeing edges
 var diagonalLength = Math.sqrt(screenHeight*screenHeight + screenWidth*screenWidth);
@@ -272,8 +277,12 @@ function updateRelativePositions() {
 		return b.distance - a.distance;
 	});
 	
-	for (i=0, l=pois.length; i<l; i++) {
+	var cnt = pois.length;
+	rankHeight = yRange / cnt;
+	
+	for (i=0; i<cnt; i++) {
 		pois[i].view.zIndex = i;
+		pois[i].distanceRank = i;
 	}
 }
 
@@ -329,14 +338,15 @@ function updatePoiViews() {
 				// Apply the transform
 				var transform = Ti.UI.create2DMatrix();
 
-				var distanceRank = (poi.distance - minPoiDistance) / poiDistanceRange;
+				var relativeDistance = (poi.distance - minPoiDistance) / poiDistanceRange;
 
-				var y = lowY + distanceRank * yRange + yOffset;
+				var y = highY - poi.distanceRank * rankHeight + yOffset;
+				
 				// this translation is from the center of the screen
 				transform = transform.translate(horizontalPositionInScene, y);
 
 
-				var scale = maxPoiScale - distanceRank * poiScaleRange;
+				var scale = maxPoiScale - relativeDistance * poiScaleRange;
 				transform = transform.scale(scale);
 
 				poi.view.transform = transform;
@@ -451,9 +461,8 @@ function closeAndDestroy() {
 	if (!isAndroid) {
 		Ti.Media.hideCamera();
 	}
-	setTimeout(function() {
-		$.win.close();
-	}, 500);
+
+	$.win.close();
 }
 
 
