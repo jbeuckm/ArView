@@ -81,7 +81,8 @@ acc.setupCallback(accelerationHandler);
 acc.start();
 
 
-function showAR() {
+function openCamera() {
+
 	var cameraTransform = Ti.UI.create2DMatrix();
 	cameraTransform = cameraTransform.scale(1);
 
@@ -127,7 +128,8 @@ $.win.addEventListener('open', windowOpenHandler);
 function windowOpenHandler() {
     $.win.removeEventListener('open', windowOpenHandler);
 	Ti.API.debug('AR Window Open...');
-	setTimeout(showAR, 500);
+
+	setTimeout(openCamera, 500);
 }
 
 
@@ -250,7 +252,8 @@ function updateRelativePositions() {
 			poi.distance = location_utils.calculateDistance(deviceLocation, poi);
 			
 			// this would ideally be more of a databinding event
-			poi.controller.setDistance(Math.floor(poi.distance)+'m');
+			if (poi.controller)
+				poi.controller.setDistance(Math.floor(poi.distance)+'m');
 
 			if (poi.distance <= maxRange) {
 				
@@ -430,15 +433,18 @@ function attachArViewsToPois(pois) {
 		
 		var poi = pois[i];
 		
-		var c = require('/alloy').createWidget('ArView', 'poi', {
-			id: poi.id,
-			title: poi.title,
-			image: poi.image
-		});
-
-		poi.controller = c;
-
-		poi.view = c.getView();
+		if (!poi.view) {
+			
+			var c = require('/alloy').createWidget('ArView', 'poi', {
+				id: poi.id,
+				title: poi.title,
+				image: poi.image
+			});
+	
+			poi.controller = c;
+	
+			poi.view = c.getView();
+		}
 	}
 }
 
@@ -462,7 +468,9 @@ function closeAndDestroy() {
 		Ti.Media.hideCamera();
 	}
 
-	$.win.close();
+	setTimeout(function(){
+		$.win.close();
+	}, 500);
 }
 
 

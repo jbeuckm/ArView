@@ -4,6 +4,8 @@
 
 	<Window id="win">
 		
+		<Label>Opening the camera...</Label>
+		
 		<View id="overlay">
 			
 			<View id="gimbal">
@@ -23,11 +25,11 @@
 				</View>
 			
 			</View>
-<!-->			
+
 			<Button id="closeButton" onClick="closeAndDestroy" />
 
 			<View id="radarView"></View>
-	-->			
+
 		</View>
 
 	</Window>
