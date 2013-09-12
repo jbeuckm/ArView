@@ -81,7 +81,19 @@ acc.setupCallback(accelerationHandler);
 acc.start();
 
 
+function cameraClosed() {
+	alert("camera closed");
+}
+
 function openCamera() {
+
+	if (Ti.Platform.model == 'Simulator') {
+		showSimulatorPois();
+		return;
+	}
+
+	$.activityIndicator.message = "opening camera view...";
+	$.activityIndicator.show();
 
 	var cameraTransform = Ti.UI.create2DMatrix();
 	cameraTransform = cameraTransform.scale(1);
@@ -90,21 +102,46 @@ function openCamera() {
 	Ti.Geolocation.addEventListener('location', locationCallback);
 	Ti.Media.showCamera({
 		success : function(event) {
+			cameraClosed();
 		},
-		cancel : function() {
+		cancel : function(event) {
 			Ti.API.error('android user cancelled open ar view');
+			cameraClosed();
 		},
 		error : function(error) {
 			Ti.API.error('unable to open camera view');
+			cameraClosed();
 		},
 		mediaTypes : [Ti.Media.MEDIA_TYPE_VIDEO],
 		showControls : false,
 		autohide : false,
 		autofocus : "off",
 		animated : false,
+		allowEditing: false,
 		overlay : $.overlay,
 		transform: cameraTransform
 	});
+	
+	$.win.fireEvent("cameraOpen");
+}
+
+
+function showSimulatorPois() {
+	
+	var scrollview = Ti.UI.createScrollView({
+		
+	});
+	
+	for (i=0, l=pois.length; i<l; i++) {
+		var poi = pois[i];
+		if (poi.view) {
+			scrollview.add(poi.view);
+		}
+	}
+	
+	$.win.add(scrollview);
+	
+	$.win.fireEvent("cameraOpen");
 }
 
 
@@ -456,6 +493,9 @@ function closeAndDestroy() {
 	acc.destroy();
 	Ti.Geolocation.removeEventListener('heading', headingCallback);
 	Ti.Geolocation.removeEventListener('location', locationCallback);
+	
+	$.activityIndicator.message = "closing camera view...";
+	$.activityIndicator.show();
 
     for (i=0, l=pois.length; i<l; i++) {
         var poi = pois[i];
@@ -470,7 +510,7 @@ function closeAndDestroy() {
 
 	setTimeout(function(){
 		$.win.close();
-	}, 500);
+	}, 750);
 }
 
 

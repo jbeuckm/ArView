@@ -4,7 +4,7 @@
 
 	<Window id="win">
 		
-		<Label>Opening the camera...</Label>
+		<ActivityIndicator id="activityIndicator"/>
 		
 		<View id="overlay">
 			
