@@ -82,7 +82,7 @@ acc.start();
 
 
 function cameraClosed() {
-	alert("camera closed");
+	Ti.API.debug("camera closed");
 }
 
 function openCamera() {
@@ -117,7 +117,6 @@ function openCamera() {
 		autohide : false,
 		autofocus : "off",
 		animated : false,
-		allowEditing: false,
 		overlay : $.overlay,
 		transform: cameraTransform
 	});
@@ -197,9 +196,6 @@ if (args.pois) {
 }
 
 
-function poiClick(e) {
-	alert(e);
-}
 
 
 function cullDistantPois(_pois, MAX_COUNT) {
@@ -411,8 +407,10 @@ function addPoiViews() {
 		var poi = pois[i];
 		if (poi.view) {
 
-			poi.view.addEventListener('click', poiClick);
-
+			if (args.poiClickHandler) {
+				poi.view.addEventListener('click', args.poiClickHandler);
+			}
+			
 			poi.view.visible = false;
 			poi.inRange = true;
 			
@@ -500,7 +498,9 @@ function closeAndDestroy() {
     for (i=0, l=pois.length; i<l; i++) {
         var poi = pois[i];
         if (poi.view) {
-            poi.view.removeEventListener('click', poiClick);
+        	if (args.poiClickHandler) {
+	            poi.view.removeEventListener('click', args.poiClickHandler);
+        	}
         }
     }
 
