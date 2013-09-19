@@ -1,45 +1,51 @@
-Window: {
-	modal : true,
-	navBarHidden : true,
+"#win": {
+//	modal : true,
+//	navBarHidden : true,
 	fullscreen : true,
 	orientationModes : [Ti.UI.PORTRAIT],
-	layout: null
+	layout: null,
+	top: 0
 }
+/*
 View: {
 	layout: null
 }
-
+*/
 '#arContainer': {
 	backgroundColor : 'transparent'
 }
 
 '#closeButton': {
-	top : '5dp',
-	right : '5dp',
-	height : '45dp',
-	width : '45dp',
+	top : 5,
+	right : 5,
+	height : 45,
+	width : 45,
+backgroundColor : 'rgba(255,0,0,.2)',
 	backgroundImage : '/images/ArView/close.png'
 }
 
 '#overlay': {
-	backgroundColor : 'transparent'
+	backgroundColor : 'rgba(0,0,255,.2)',
+	layout: null,
+	top: 0
 }
 
 
 '#radarView': {
+backgroundColor : 'rgba(0,255,0,.2)',
 	backgroundImage : '/images/ArView/radar.png',
-	width : '80dp',
-	height : '80dp',
-	bottom : '10dp',
-	left : '10dp',
-	opacity : 0.7
+	width : 80,
+	height : 80,
+	bottom : 10,
+	left : 10
 }
 
 '#debugOverlay': {
 	height: 100,
 	width: 150,
 	layout: 'vertical',
-	backgroundColor: 'rgba(0,0,0,.6)'
+	backgroundColor: 'rgba(0,0,0,.6)',
+	touchEnabled: false
 }
 '.fieldHolder': {
 	layout: 'horizontal',

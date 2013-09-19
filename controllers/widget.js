@@ -1,15 +1,8 @@
 var args = arguments[0] || {};
 
-if (!$.radarView) {
-    $.radarView = Ti.UI.createView();
-}
-if (!$.closeButton) {
-    $.closeButton = Ti.UI.createView();
-}
-
 
 if (!args.showDebugView) {
-    $.debugOverlay.visible = false;
+    $.debugOverlay.hide();
 }
 
 var acc = require(WPATH('accelerometer'));
@@ -62,8 +55,7 @@ else {
 var yOffset = 0;
 var PI_2 = Math.PI/2;
 
-var devicePitch = 0; 
-
+var devicePitch = 0;
 var deviceRoll = 0;
 
 function accelerationHandler(e) {
