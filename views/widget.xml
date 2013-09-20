@@ -4,9 +4,9 @@
 
 	<Window id="win">
 		
-		<ActivityIndicator id="activityIndicator"/>
+		<Label id="activityIndicator"/>
 		
-		<View id="overlay">
+		<View id="overlayContainer">
 			
 			<View id="gimbal">
 

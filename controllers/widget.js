@@ -1,5 +1,5 @@
-var args = arguments[0] || {};
 
+var args = arguments[0] || {};
 
 if (!args.showDebugView) {
     $.debugOverlay.hide();
@@ -32,8 +32,13 @@ var rankHeight = 10;
 
 // view large enough to rotate ~45deg without seeing edges
 var diagonalLength = Math.sqrt(screenHeight*screenHeight + screenWidth*screenWidth);
-$.overlay.height = diagonalLength;
-$.overlay.width = diagonalLength;
+
+Ti.API.debug("diagonalLength = "+diagonalLength);
+
+$.overlayContainer.height = diagonalLength;
+$.overlayContainer.width = diagonalLength;
+$.gimbal.height = diagonalLength;
+$.gimbal.width = diagonalLength;
 $.arContainer.height = diagonalLength;
 $.arContainer.width = diagonalLength;
 
@@ -84,8 +89,8 @@ function openCamera() {
 		return;
 	}
 
-	$.activityIndicator.message = "opening camera view...";
-	$.activityIndicator.show();
+	$.activityIndicator.text = "opening camera view...";
+	$.activityIndicator.visible = true;
 
 	var cameraTransform = Ti.UI.create2DMatrix();
 	cameraTransform = cameraTransform.scale(1);
@@ -109,7 +114,7 @@ function openCamera() {
 		autohide : false,
 		autofocus : "off",
 		animated : false,
-		overlay : $.overlay,
+		overlay : $.overlayContainer,
 		transform: cameraTransform
 	});
 	
@@ -137,7 +142,7 @@ function showSimulatorPois() {
 
 
 if (args.overlay) {
-	$.overlay.add(args.overlay);
+	$.overlayContainer.add(args.overlay);
 }
 
 
@@ -484,8 +489,8 @@ function closeAndDestroy() {
 	Ti.Geolocation.removeEventListener('heading', headingCallback);
 	Ti.Geolocation.removeEventListener('location', locationCallback);
 	
-	$.activityIndicator.message = "closing camera view...";
-	$.activityIndicator.show();
+	$.activityIndicator.text = "closing camera view...";
+	$.activityIndicator.visible = true;
 
     for (i=0, l=pois.length; i<l; i++) {
         var poi = pois[i];

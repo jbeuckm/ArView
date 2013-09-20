@@ -1,16 +1,25 @@
 "#win": {
-//	modal : true,
-//	navBarHidden : true,
+	modal : true,
+	navBarHidden : true,
 	fullscreen : true,
 	orientationModes : [Ti.UI.PORTRAIT],
-	layout: null,
+	layout: "composite",
 	top: 0
 }
-/*
-View: {
-	layout: null
+
+
+"View": {
+	layout: "composite"
 }
-*/
+
+
+"#container": {
+	layout: "composite"
+}
+
+"#activityIndicator": {
+	top: 15
+}
 '#arContainer': {
 	backgroundColor : 'transparent'
 }
@@ -20,19 +29,16 @@ View: {
 	right : 5,
 	height : 45,
 	width : 45,
-backgroundColor : 'rgba(255,0,0,.2)',
 	backgroundImage : '/images/ArView/close.png'
 }
 
-'#overlay': {
-	backgroundColor : 'rgba(0,0,255,.2)',
-	layout: null,
+'#overlayContainer': {
+	layout: "composite",
 	top: 0
 }
 
 
 '#radarView': {
-backgroundColor : 'rgba(0,255,0,.2)',
 	backgroundImage : '/images/ArView/radar.png',
 	width : 80,
 	height : 80,
