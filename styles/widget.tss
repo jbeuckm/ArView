@@ -3,7 +3,7 @@
 	navBarHidden : true,
 	fullscreen : true,
 	orientationModes : [Ti.UI.PORTRAIT],
-	layout: "composite",
+	layout: null,
 	top: 0
 }
 
@@ -64,4 +64,12 @@
 		fontSize : 16
 	},
 	width: "50%"
+}
+
+"#simulatorView": {
+	top: 0,
+	width: Ti.UI.FILL,
+	height: Ti.UI.FILL,
+	layout: "vertical",
+	visible: false
 }

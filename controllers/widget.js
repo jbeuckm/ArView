@@ -33,8 +33,6 @@ var rankHeight = 10;
 // view large enough to rotate ~45deg without seeing edges
 var diagonalLength = Math.sqrt(screenHeight*screenHeight + screenWidth*screenWidth);
 
-Ti.API.debug("diagonalLength = "+diagonalLength);
-
 $.overlayContainer.height = diagonalLength;
 $.overlayContainer.width = diagonalLength;
 $.gimbal.height = diagonalLength;
@@ -83,60 +81,65 @@ function cameraClosed() {
 }
 
 function openCamera() {
-
-	if (Ti.Platform.model == 'Simulator') {
-		showSimulatorPois();
-		return;
-	}
+Ti.API.debug("openCamera with mode = "+Ti.Platform.model);
 
 	$.activityIndicator.text = "opening camera view...";
 	$.activityIndicator.visible = true;
-
-	var cameraTransform = Ti.UI.create2DMatrix();
-	cameraTransform = cameraTransform.scale(1);
-
-	Ti.Geolocation.addEventListener('heading', headingCallback);
-	Ti.Geolocation.addEventListener('location', locationCallback);
-	Ti.Media.showCamera({
-		success : function(event) {
-			cameraClosed();
-		},
-		cancel : function(event) {
-			Ti.API.error('android user cancelled open ar view');
-			cameraClosed();
-		},
-		error : function(error) {
-			Ti.API.error('unable to open camera view');
-			cameraClosed();
-		},
-		mediaTypes : [Ti.Media.MEDIA_TYPE_VIDEO],
-		showControls : false,
-		autohide : false,
-		autofocus : "off",
-		animated : false,
-		overlay : $.overlayContainer,
-		transform: cameraTransform
-	});
 	
+	if (Ti.Platform.model == 'Simulator') {
+		acc.destroy();
+//		args.staticLocation = true;
+$.overlayContainer.hide();
+		showSimulatorPois();
+	}
+	else {
+		var cameraTransform = Ti.UI.create2DMatrix();
+		cameraTransform = cameraTransform.scale(1);
+	
+		Ti.Geolocation.addEventListener('heading', headingCallback);
+		Ti.Geolocation.addEventListener('location', locationCallback);
+		Ti.Media.showCamera({
+			success : function(event) {
+	//			$.win.fireEvent("cameraOpen");
+			},
+			cancel : function(event) {
+				Ti.API.error('android user cancelled open ar view');
+				cameraClosed();
+			},
+			error : function(error) {
+				Ti.API.error('unable to open camera view');
+				cameraClosed();
+			},
+			mediaTypes : [Ti.Media.MEDIA_TYPE_VIDEO],
+			showControls : false,
+			autohide : false,
+			autofocus : "off",
+			animated : false,
+			overlay : $.overlayContainer,
+			transform: cameraTransform
+		});
+	}
+		
 	$.win.fireEvent("cameraOpen");
 }
 
 
 function showSimulatorPois() {
+Ti.API.debug("showSimulatorPois()");
 	
-	var scrollview = Ti.UI.createScrollView({
+	for (i=0, l=args.pois.length; i<l; i++) {
+		var poi = args.pois[i];
 		
-	});
-	
-	for (i=0, l=pois.length; i<l; i++) {
-		var poi = pois[i];
 		if (poi.view) {
-			scrollview.add(poi.view);
+
+			// make visible and reset matrix
+			poi.view.transform = Ti.UI.create2DMatrix();
+			poi.view.visible = true;
+
+			$.simulatorView.add(poi.view);
 		}
 	}
-	
-	$.win.add(scrollview);
-	
+	$.simulatorView.visible = true;
 	$.win.fireEvent("cameraOpen");
 }
 
@@ -235,6 +238,8 @@ function locationCallback(e) {
 
 		updateRelativePositions();
 
+		if (!pois) return;
+
 		for (i=0, l=pois.length; i<l; i++) {
 			var poi = pois[i];
 			positionRadarBlip(poi);
@@ -273,6 +278,8 @@ function updateRelativePositions() {
 	minPoiDistance = Number.MAX_VALUE;
 	maxPoiDistance = 0;
 
+	if (!pois) return;
+
 	for (i=0, l=pois.length; i<l; i++) {
 
 		var poi = pois[i];
@@ -282,9 +289,10 @@ function updateRelativePositions() {
 			poi.distance = location_utils.calculateDistance(deviceLocation, poi);
 			
 			// this would ideally be more of a databinding event
-			if (poi.controller)
+			if (poi.controller) {
 				poi.controller.setDistance(Math.floor(poi.distance)+'m');
-
+			}
+			
 			if (poi.distance <= maxRange) {
 				
 				maxPoiDistance = Math.max(maxPoiDistance, poi.distance);
@@ -333,6 +341,8 @@ var headingStability = .7;
 var headingVolatility = 1 - headingStability;
 
 function updatePoiViews() {
+
+	if (!pois) return;
 
     filteredPitch = (pitchStability * filteredPitch) + (pitchVolatility * devicePitch);
     yOffset = 2 * filteredPitch;
@@ -404,9 +414,7 @@ function addPoiViews() {
 		var poi = pois[i];
 		if (poi.view) {
 
-			if (args.poiClickHandler) {
-				poi.view.addEventListener('click', args.poiClickHandler);
-			}
+			poi.view.addEventListener('click', localPoiClick);
 			
 			poi.view.visible = false;
 			poi.inRange = true;
@@ -417,7 +425,19 @@ function addPoiViews() {
 }
 
 
+function localPoiClick(e) {
+	alert("arview widget sees click on poi "+poi.id);
+	e.poiId = poi.id;
+	alert(e);
+	if (args.poiClickHandler) {
+		args.poiClickHandler(e);
+	}
+}
+
+
 function createRadarBlips() {
+
+	if (!pois) return;
 
 	for (i=0, l=pois.length; i<l; i++) {
 
@@ -492,19 +512,20 @@ function closeAndDestroy() {
 	$.activityIndicator.text = "closing camera view...";
 	$.activityIndicator.visible = true;
 
-    for (i=0, l=pois.length; i<l; i++) {
-        var poi = pois[i];
-        if (poi.view) {
-        	if (args.poiClickHandler) {
-	            poi.view.removeEventListener('click', args.poiClickHandler);
-        	}
-        }
-    }
 
 	if (!isAndroid) {
 		Ti.Media.hideCamera();
 	}
 
+	if (pois) {
+	    for (i=0, l=pois.length; i<l; i++) {
+	        var poi = pois[i];
+	        if (poi.view) {
+	            poi.view.removeEventListener('click', localPoiClick);
+	        }
+	    }
+	}
+	
 	setTimeout(function(){
 		$.win.close();
 	}, 750);

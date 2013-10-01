@@ -32,6 +32,10 @@
 
 		</View>
 
+		<ScrollView id="simulatorView"></ScrollView>
+		
+		<View backgroundColor="#f00" width="10" height="10"/>
+		
 	</Window>
 	
 </Alloy>
