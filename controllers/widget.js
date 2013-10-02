@@ -20,7 +20,7 @@ var halfScreenHeight = screenHeight / 2;
 var halfScreenWidth = screenWidth / 2;
 
 
-var MAX_POI_COUNT = 10;
+var MAX_POI_COUNT = 25;
 
 var limitLeft = -halfScreenHeight - 100;
 var limitRight = halfScreenHeight + 100;
@@ -94,6 +94,8 @@ Ti.API.debug("openCamera with mode = "+Ti.Platform.model);
 		showSimulatorPois();
 	}
 	else {
+		$.simulatorView.hide();
+
 		var cameraTransform = Ti.UI.create2DMatrix();
 		cameraTransform = cameraTransform.scale(1);
 	
@@ -141,7 +143,6 @@ Ti.API.debug("showSimulatorPois()");
 		}
 	}
 	$.simulatorView.visible = true;
-Ti.API.debug($.simulatorView);
 	
 	$.win.fireEvent("cameraOpen");
 }
@@ -180,6 +181,27 @@ if (args.hideCloseButton) {
 deviceLocation = args.initialLocation;
 
 
+function cullDistantPois(_pois, MAX_COUNT) {
+
+	for (i=0, l=_pois.length; i<l; i++) {
+		var poi = _pois[i];
+		var d = location_utils.calculateDistance(deviceLocation, poi);
+		poi.distance = d;
+	}
+
+	if (_pois.length > MAX_COUNT) {
+		_pois.sort(function(a, b){
+			return a.distance - b.distance;
+		});
+		
+		_pois = _pois.slice(0, MAX_POI_COUNT);
+	}
+
+	return _pois;
+}
+
+var pois = [];
+
 function assignPOIs(_pois) {
 
 	pois = cullDistantPois(_pois, MAX_POI_COUNT);
@@ -201,25 +223,6 @@ if (args.pois) {
 
 
 
-function cullDistantPois(_pois, MAX_COUNT) {
-
-	for (i=0, l=_pois.length; i<l; i++) {
-		var poi = _pois[i];
-		var d = location_utils.calculateDistance(deviceLocation, poi);
-		poi.distance = d;
-	}
-
-	if (_pois.length > MAX_COUNT) {
-		_pois.sort(function(a, b){
-			return a.distance - b.distance;
-		});
-		
-		_pois = _pois.slice(0, MAX_POI_COUNT);
-	}
-
-	return _pois;
-}
-
 
 /**
  * Device has indicated a new location
@@ -240,8 +243,6 @@ function locationCallback(e) {
 	else {
 
 		updateRelativePositions();
-
-		if (!pois) return;
 
 		for (i=0, l=pois.length; i<l; i++) {
 			var poi = pois[i];
@@ -280,8 +281,6 @@ function updateRelativePositions() {
 	
 	minPoiDistance = Number.MAX_VALUE;
 	maxPoiDistance = 0;
-
-	if (!pois) return;
 
 	for (i=0, l=pois.length; i<l; i++) {
 
@@ -344,8 +343,6 @@ var headingStability = .7;
 var headingVolatility = 1 - headingStability;
 
 function updatePoiViews() {
-
-	if (!pois) return;
 
     filteredPitch = (pitchStability * filteredPitch) + (pitchVolatility * devicePitch);
     yOffset = 2 * filteredPitch;
@@ -412,30 +409,27 @@ function updatePoiViews() {
 
 
 function addPoiViews() {
+
+Ti.API.info("adding views from "+pois.length+" pois");
 	
 	for (i=0, l=pois.length; i<l; i++) {
 		var poi = pois[i];
-		if (poi.view) {
 
-			poi.view.addEventListener('click', localPoiClick);
-			
-			poi.view.visible = false;
-			poi.inRange = true;
-			
-			$.arContainer.add(poi.view);
-		}
+		poi.view.visible = false;
+		poi.inRange = true;
+Ti.API.info(poi.id+": "+poi.title);		
+		
+		poi.view.poiId = poi.id;
+
+		var pId = poi.id + "";
+		
+		poi.view.addEventListener('click', localPoiClick);
+
+		$.arContainer.add(poi.view);
 	}
 }
 
 
-function localPoiClick(e) {
-	alert("arview widget sees click on poi "+poi.id);
-	e.poiId = poi.id;
-	alert(e);
-	if (args.poiClickHandler) {
-		args.poiClickHandler(e);
-	}
-}
 
 
 function createRadarBlips() {
@@ -500,8 +494,19 @@ function attachArViewsToPois(pois) {
 	
 			poi.view = c.getView();
 		}
+
 	}
 }
+
+
+function localPoiClick(e) {
+	Ti.API.debug("arview widget sees click on poi");
+	Ti.API.debug(this);
+	if (args.poiClickHandler) {
+		args.poiClickHandler(this);
+	}
+}
+
 
 
 var updateDisplayInterval = setInterval(updatePoiViews, 50);
@@ -521,14 +526,12 @@ function closeAndDestroy() {
 		Ti.Media.hideCamera();
 	}
 
-	if (pois) {
-	    for (i=0, l=pois.length; i<l; i++) {
-	        var poi = pois[i];
-	        if (poi.view) {
-	            poi.view.removeEventListener('click', localPoiClick);
-	        }
-	    }
-	}
+    for (i=0, l=pois.length; i<l; i++) {
+        var poi = pois[i];
+        if (poi.view) {
+            poi.view.removeEventListener('click', localPoiClick);
+        }
+    }
 	
 	setTimeout(function(){
 		$.win.close();
