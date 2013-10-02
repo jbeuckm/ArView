@@ -89,6 +89,8 @@ Ti.API.debug("openCamera with mode = "+Ti.Platform.model);
 	if (Ti.Platform.model == 'Simulator') {
 		acc.destroy();
 		args.staticLocation = true;
+		$.overlayContainer.hide();
+		clearInterval(updateDisplayInterval);
 		showSimulatorPois();
 	}
 	else {
@@ -100,7 +102,6 @@ Ti.API.debug("openCamera with mode = "+Ti.Platform.model);
 		Ti.Media.showCamera({
 			success : function(event) {
 	//			$.win.fireEvent("cameraOpen");
-				updateDisplayInterval = setInterval(updatePoiViews, 50);
 			},
 			cancel : function(event) {
 				Ti.API.error('android user cancelled open ar view');
@@ -503,7 +504,8 @@ function attachArViewsToPois(pois) {
 }
 
 
-var updateDisplayInterval;
+var updateDisplayInterval = setInterval(updatePoiViews, 50);
+
 
 function closeAndDestroy() {
 	clearInterval(updateDisplayInterval);
