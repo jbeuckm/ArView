@@ -20,7 +20,7 @@ var halfScreenHeight = screenHeight / 2;
 var halfScreenWidth = screenWidth / 2;
 
 
-var MAX_POI_COUNT = aergs.MAX_POI_COUNT || 16;
+var MAX_POI_COUNT = args.MAX_POI_COUNT || 16;
 
 var limitLeft = -halfScreenHeight - 100;
 var limitRight = halfScreenHeight + 100;
