@@ -6,8 +6,6 @@
 		
 		<Label id="activityIndicator"/>
 		
-		<ScrollView id="simulatorView"></ScrollView>
-
 		<View id="overlayContainer">
 			
 			<View id="gimbal">
@@ -34,6 +32,8 @@
 
 		</View>
 		
+		<ScrollView id="simulatorView"></ScrollView>
+
 	</Window>
 	
 </Alloy>
