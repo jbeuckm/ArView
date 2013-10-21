@@ -9,6 +9,7 @@ exports.setDistance = function(d) {
 };
 
 if (args.image) {
+	Ti.API.debug("ArView poi got image "+args.image);
 	$.poiImage.image = args.image;
 }
 else {

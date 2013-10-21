@@ -292,7 +292,7 @@ function updateRelativePositions() {
 			
 			// this would ideally be more of a databinding event
 			if (poi.controller) {
-				poi.controller.setDistance(Math.floor(poi.distance)+'m');
+				poi.controller.setDistance(location_utils.neatUSfromMeters(poi.distance));
 			}
 			
 			if (poi.distance <= maxRange) {
