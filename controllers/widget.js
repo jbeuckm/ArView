@@ -260,18 +260,24 @@ var trueHeading = 0;
  * 
  * @param {Object} e
  */
+    
 function headingCallback(e) {
 
-    trueHeading = e.heading.trueHeading;
+Ti.API.trace("heading = "+e.heading.trueHeading);
 
-	$.headingLabel.text = trueHeading.toPrecision(3) + "\xB0";
+    if (~~(trueHeading - e.heading.trueHeading) > 45) {
+        filteredTrueHeading = e.heading.trueHeading;
+    }
+    trueHeading = e.heading.trueHeading;
+    
+	$.headingLabel.text = trueHeading.toPrecision(3) + "º";
 
 	$.radarView.transform = Ti.UI.create2DMatrix().rotate(-1 * deviceBearing);
 }
 
 var minPoiDistance, maxPoiDistance;
 var distanceRange = 1;
-var minPoiScale = .7, maxPoiScale = 1.5;
+var minPoiScale = .8, maxPoiScale = .8;
 var poiScaleRange = maxPoiScale - minPoiScale;
 
 /**
@@ -338,7 +344,7 @@ var filteredRoll = 0;
 var rollStability = .7;
 var rollVolatility = 1 - rollStability;
 
-var filteredTrueHeading = 0;
+var filteredTrueHeading = null;
 var headingStability = .7;
 var headingVolatility = 1 - headingStability;
 
@@ -515,7 +521,7 @@ var updateDisplayInterval = setInterval(updatePoiViews, 50);
 function closeAndDestroy() {
 	clearInterval(updateDisplayInterval);
 	acc.destroy();
-	Ti.Geolocation.removeEventListener('heading', headingCallback);
+    Ti.Geolocation.removeEventListener('heading', headingCallback);
 	Ti.Geolocation.removeEventListener('location', locationCallback);
 	
 	$.activityIndicator.text = "closing camera view...";
