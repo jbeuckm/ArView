@@ -169,7 +169,7 @@ function windowOpenHandler() {
     $.win.removeEventListener('open', windowOpenHandler);
 	Ti.API.debug('AR Window Open...');
 
-	setTimeout(openCamera, 500);
+	setTimeout(openCamera, 250);
 }
 
 
@@ -454,12 +454,13 @@ function createRadarBlips() {
 	}
 }
 
+var radarRange = 10000;
 
 function positionRadarBlip(poi) {
 
 	var rad = location_utils.degrees2Radians(poi.bearing);
 
-	var relativeDistance = poi.distance / (maxRange * 1.2);
+	var relativeDistance = poi.distance / (radarRange * 1.2);
 	var x = (40 + (relativeDistance * 40 * Math.sin(rad)));
 	var y = (40 - (relativeDistance * 40 * Math.cos(rad)));
 	
@@ -518,7 +519,8 @@ function localPoiClick(e) {
 var updateDisplayInterval = setInterval(updatePoiViews, 50);
 
 
-function closeAndDestroy() {
+function cleanup() {
+
 	clearInterval(updateDisplayInterval);
 	acc.destroy();
     Ti.Geolocation.removeEventListener('heading', headingCallback);
@@ -527,24 +529,28 @@ function closeAndDestroy() {
 	$.activityIndicator.text = "closing camera view...";
 	$.activityIndicator.visible = true;
 
-
-	if (!isAndroid) {
-		Ti.Media.hideCamera();
-	}
-
     for (i=0, l=pois.length; i<l; i++) {
         var poi = pois[i];
         if (poi.view) {
             poi.view.removeEventListener('click', localPoiClick);
         }
     }
-	
-	setTimeout(function(){
-		$.win.close();
-	}, 750);
+
+	$.destroy();
 }
 
 
-exports.closeAndDestroy = closeAndDestroy;
+function closeAndDestroy() {
+	
+	if (!isAndroid) {
+		Ti.Media.hideCamera();
+	}
 
-exports.cullDistantPois = cullDistantPois;
+	setTimeout(function(){
+        $.win.close();
+    }, 250);
+
+}
+
+
+$.win.closeAndDestroy = closeAndDestroy;

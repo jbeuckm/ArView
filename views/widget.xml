@@ -2,7 +2,7 @@
 
 	<Collection src="Poi"/>
 
-	<Window id="win">
+	<Window id="win" onClose="cleanup">
 		
 		<Label id="activityIndicator"/>
 		
