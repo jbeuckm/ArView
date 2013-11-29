@@ -30,6 +30,9 @@ var highY = -halfScreenWidth * .9;
 var yRange = highY - lowY;
 var rankHeight = 10;
 
+var radarRange = 10000;
+
+
 // view large enough to rotate ~45deg without seeing edges
 var diagonalLength = Math.sqrt(screenHeight*screenHeight + screenWidth*screenWidth);
 
@@ -245,8 +248,7 @@ function locationCallback(e) {
 		updateRelativePositions();
 
 		for (i=0, l=pois.length; i<l; i++) {
-			var poi = pois[i];
-			positionRadarBlip(poi);
+			positionRadarBlip(pois[i]);
 		}
 	}
 };
@@ -284,7 +286,7 @@ var poiScaleRange = maxPoiScale - minPoiScale;
  * Calculate heading/distance of each poi from deviceLocation
  */
 function updateRelativePositions() {
-	
+
 	minPoiDistance = Number.MAX_VALUE;
 	maxPoiDistance = 0;
 
@@ -308,9 +310,7 @@ function updateRelativePositions() {
 				
 				poi.inRange = true;
 
-				poi.bearing = location_utils.calculateBearing(deviceLocation, poi);
-				
-				positionRadarBlip(poi);
+				poi.bearing = location_utils.calculateBearing(deviceLocation, poi);				
 			} 
 			else {
 				// don't show pois that are beyond maxDistance
@@ -325,13 +325,17 @@ function updateRelativePositions() {
 	pois.sort(function(a, b) {
 		return b.distance - a.distance;
 	});
-	
+
+				
+	radarRange = Math.max(100, pois[0].distance);
+
 	var cnt = pois.length;
 	rankHeight = yRange / cnt;
 	
 	for (i=0; i<cnt; i++) {
 		pois[i].view.zIndex = i;
 		pois[i].distanceRank = i;
+		positionRadarBlip(pois[i]);
 	}
 }
 
@@ -416,14 +420,11 @@ function updatePoiViews() {
 
 function addPoiViews() {
 
-Ti.API.info("adding views from "+pois.length+" pois");
-	
 	for (i=0, l=pois.length; i<l; i++) {
 		var poi = pois[i];
 
 		poi.view.visible = false;
 		poi.inRange = true;
-Ti.API.info(poi.id+": "+poi.title);		
 		
 		poi.view.poiId = poi.id;
 
@@ -454,15 +455,15 @@ function createRadarBlips() {
 	}
 }
 
-var radarRange = 10000;
 
 function positionRadarBlip(poi) {
 
 	var rad = location_utils.degrees2Radians(poi.bearing);
 
-	var relativeDistance = poi.distance / (radarRange * 1.2);
-	var x = (40 + (relativeDistance * 40 * Math.sin(rad)));
-	var y = (40 - (relativeDistance * 40 * Math.cos(rad)));
+	var relativeDistance = poi.distance / radarRange;
+
+	var x = 40 + (relativeDistance * 40 * Math.sin(rad));
+	var y = 40 - (relativeDistance * 40 * Math.cos(rad));
 	
 	poi.blip.left = (x - 1) + "dp";
 	poi.blip.top = (y - 1) + "dp";
